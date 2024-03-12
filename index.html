@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shoot The DOTs</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="header">
+        <!-- Scorecard -->
+        <div class="scorecard">
+        <h2>Score: <span class="score">0</span></h2>
+        </div>
+        <!-- Title -->
+        <h1>Shoot The DOTs</h1>
+
+        <!-- Action -->
+        <button id="start">Start Game</button>
+    </div>
+
+    <!-- Difficulty Level -->
+    <form method="get">
+      <label for="difficulty">Difficulty Level</label>
+      <select name="difficulty" id="diff">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="insane">Insane</option>
+      </select>
+
+      <button type="submit" id="play">Play</button>
+    </form>
+
+    <!-- Game Panel -->
+    <div class="gamePanel">
+      <!-- Populate canvas with JS -->
+    </div>
+
+    <script src="engine.js"></script>
+  </body>
+</html>

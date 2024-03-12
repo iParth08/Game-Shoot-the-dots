@@ -1,0 +1,91 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+}
+
+canvas {
+  border: 1px solid black; /*just to see the canvas*/
+  background-color: #333;
+  max-width: 100%;
+  max-height: 100vh;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 10vh;
+  width: 100%;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  padding: 20px;
+  font: 600 1.2rem "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scorecard {
+  color: #fff;
+  display: none;
+}
+
+#start {
+  padding: 10px;
+}
+
+form {
+  background-color: rgba(255, 255, 255, 0.1);
+  height: 60vh;
+  width: 60vw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+
+form label {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+form select,
+form option {
+  font-size: 1.5rem;
+  padding: 15px 20px;
+  width: 20vw;
+  transition: all 0.5s ease;
+  font-family: cursive;
+  text-align: center;
+}
+
+form button {
+  padding: 15px 25px;
+  width: 20vw;
+  margin-top: 20px;
+  font-family: cursive;
+  background-color: indianred;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+form > select:hover {
+  box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+form > button:hover {
+  box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.5);
+}
