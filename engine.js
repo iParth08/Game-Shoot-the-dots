@@ -20,17 +20,21 @@ let highScore = {
   Insane: 5,
 };
 
-let difficulty = 1;
-let levelUp = 5;
-let base = 0.5;
+let levelUp = 5; //player score break-through
+let base = 0.5; // base speed of enemy
+let difficulty = 1; //power-gap and speed of enemy
+let impact = 6; //particle scattering
 let spawnRate = 1000;
-let impact = 6;
-let spawnControl;
-let diffLevel;
+let spawnControl; //set interval termination on gameOver
+let diffLevel; //difficulty level selection
+
+const lightWeaponDamage = 10;
+const heavyWeaponDamage = 15;
 
 const weapons = [];
 const enemies = [];
 const particles = [];
+const hugeWeapons = [];
 
 const form = document.querySelector("form");
 const scoreboard = document.querySelector(".scorecard");
@@ -48,20 +52,20 @@ document.querySelector("#play").addEventListener("click", (e) => {
 
   switch (diffLevel) {
     case "Easy":
-      difficulty = 2;
-      spawnRate = 3000;
+      difficulty = 3;
+      spawnRate = 2000;
       break;
     case "Medium":
-      difficulty = 3;
-      spawnRate = 3000;
+      difficulty = 3.5;
+      spawnRate = 2000;
       break;
     case "Hard":
       difficulty = 4;
-      spawnRate = 2000;
+      spawnRate = 1000;
       break;
     case "Insane":
       difficulty = 5;
-      spawnRate = 2000;
+      spawnRate = 1000;
       break;
   }
 
@@ -99,9 +103,10 @@ class Player extends DOT {
 
 // 2. Weapon Class
 class Weapon extends DOT {
-  constructor(x, y, radius, color, velocity) {
+  constructor(x, y, radius, color, velocity, damage) {
     super(x, y, radius, color);
     this.velocity = velocity;
+    this.damage = damage;
   }
 
   //update position and direction => velocity
@@ -150,8 +155,29 @@ class Particle extends Weapon {
   }
 }
 
-// ---------------------------------------------------------------------------------------------
-// COMPONENT CREATION {OBJECTS}
+// KAMEHAMEHA : Huge Rectangle Weapon
+class HugeWeapon {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+  }
+
+  draw() {
+    context.beginPath();
+    context.fillStyle = this.color;
+    context.fillRect(this.x, this.y, 200, canvas.height); //design of the KAMEHAMEHA
+    context.fill();
+  }
+
+  update() {
+    this.draw();
+    this.x += 20;
+    this.y += 0;
+  }
+}
+
+// ----------------------------------------Player Component and Behaviours------------------------------------------
 
 // position player in the center
 const playerPosition = {
@@ -171,7 +197,7 @@ player.draw();
 
 // Player Pulse, Defence Active //! Additional Features
 
-// -------------------------------------Enemies Behaviours------------------------------------------------------
+// -------------------------------------ENEMIES COMPONENT AND BEHAVIOUR------------------------------------------
 
 // Enemy Spawning
 const enemySpawn = () => {
@@ -215,6 +241,8 @@ const enemySpawn = () => {
 
 // Light Weapon (Left Click)
 canvas.addEventListener("click", (event) => {
+  //*Note : No weapon cost, unlimited usage
+
   const clickAngle = Math.atan2(
     event.clientY - playerPosition.y,
     event.clientX - playerPosition.x
@@ -232,12 +260,63 @@ canvas.addEventListener("click", (event) => {
       canvas.height / 2,
       5, //todo: radius will be changed
       "white",
-      velocity
+      velocity,
+      lightWeaponDamage
     )
   );
 });
 
-// -------------------------------------------Game Engine Controls----------------------------------------
+// Heavy Weapon (Right Click)
+canvas.addEventListener("contextmenu", (event) => {
+  event.preventDefault(); //not menu popup
+
+  //*Note : Weapon cost = 3, unlimited usage
+  if (score < 6) {
+    console.log("Not enough points");
+    return;
+  } else {
+    scoreUpdate(-6); //1 value reduction each fire
+  }
+
+  const clickAngle = Math.atan2(
+    event.clientY - playerPosition.y,
+    event.clientX - playerPosition.x
+  );
+
+  const velocity = {
+    x: (Math.cos(clickAngle) * levelUp) / 2,
+    y: (Math.sin(clickAngle) * levelUp) / 2,
+  };
+
+  // push weapon in weapons array
+  weapons.push(
+    new Weapon(
+      canvas.width / 2,
+      canvas.height / 2,
+      15, //todo: radius will be changed
+      "cyan",
+      velocity,
+      heavyWeaponDamage
+    )
+  );
+});
+
+// KAMEHAMEHA THE ULTIMATE
+window.addEventListener("keydown", (event) => {
+  // *Note : Weapon cost = 20, unlimited usage
+  if (score < 20) {
+    console.log("Not enough points");
+    return;
+  } else {
+    scoreUpdate(-20); //20 value reduction each fire
+  }
+  if (event.code === "Space") {
+    console.log("kamehameha");
+    hugeWeapons.push(new HugeWeapon(0, 0, "rgba(255, 0, 133, 1"));
+  }
+});
+
+// ----------------------------------------GAME ENGINE-ANIMATION RENDERING----------------------------------------
 let animationID;
 function animation() {
   animationID = requestAnimationFrame(animation);
@@ -250,6 +329,17 @@ function animation() {
   // Update particles movement
   particles.forEach((particle) => {
     particle.update();
+  });
+
+  // Update hugeWeapon movement
+  hugeWeapons.forEach((hugeWeapon, hugeWeaponIndex) => {
+    // Huge Weapon Removal out of screen
+    if (hugeWeapon.x > canvas.width) {
+      hugeWeapons.splice(hugeWeaponIndex, 1);
+    } else {
+      // weapon motion update
+      hugeWeapon.update();
+    }
   });
 
   // Update weapons movement
@@ -285,7 +375,20 @@ function animation() {
       gameOver();
     }
 
-    // Collision Detection Logic
+    // Collision Detection Logic with Huge Weapon (Kamehameha)
+    hugeWeapons.forEach((hugeWeapon, hugeWeaponIndex) => {
+      //*NOTE : Kamehameha doesnot give score, just save your life and require 50 score-points each
+      const closenessHugeWeaponEnemy = hugeWeapon.x - enemy.x;
+
+      if (closenessHugeWeaponEnemy < 200 && closenessHugeWeaponEnemy > -200) {
+        // Ultimate Elimination
+        setTimeout(() => {
+          enemies.splice(enemyIndex, 1);
+        }, 0);
+      }
+    });
+
+    // Collision Detection Logic with Light/Heavy Weapon
     weapons.forEach((weapon, weaponIndex) => {
       const closenessWeaponEnemy = Math.hypot(
         weapon.x - enemy.x,
@@ -294,11 +397,12 @@ function animation() {
 
       //if circle is close enough to touch the periphery
       if (closenessWeaponEnemy - weapon.radius - enemy.radius < 1) {
-        scoreUpdate(5); //! Testing feature
+        // for every hit, score will increase by fixed 5
+        scoreUpdate(5);
 
-        if (enemy.radius > 16) {
+        if (enemy.radius > weapon.damage + 5) {
           //set smooth transition for radius reduce [REDUCE]
-          gsap.to(enemy, { radius: enemy.radius - 10 });
+          gsap.to(enemy, { radius: enemy.radius - weapon.damage });
 
           setTimeout(() => {
             weapons.splice(weaponIndex, 1);
@@ -316,6 +420,8 @@ function animation() {
   });
 }
 
+// -------------------------------------- GAME FUNCTIONS ----------------------------------------
+
 const particleGenerator = (weapon, enemy) => {
   // Particles Effects Movement generation
   for (let i = 0; i < 20; i++) {
@@ -328,14 +434,16 @@ const particleGenerator = (weapon, enemy) => {
   }
 };
 const gameOver = () => {
+  // Update Highscore
+  highScorer(score); //! Testing feature
+
+  // display GameOver UI
   score = 0;
+  scoreboard.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`;
   form.style.display = "flex";
   title.style.display = "block";
   levelScore.style.display = "block";
   scoreboard.style.display = "none";
-
-  // Update Highscore
-  highScorer(score); //! Testing feature
 
   // empty arrays and stop new enemy spawn
   clearInterval(spawnControl);
@@ -355,10 +463,14 @@ const highScorer = (scored) => {
   }
 
   levelScore.innerHTML = `${diffLevel}: ${highScore[diffLevel]}`;
-  console.table([diffLevel, highScore[diffLevel]]);
 };
 
-// !issue 1 : too many enemy attack at once in second start => terminate setInterval
-// !issue 2 : speed and spawn rate
+//-----------------------------------TESTING NEW FEATURE----------------------------------------------
+
+//----------------------------------ISSUES AND FIXES---------------------------------------------------
+// *issue 1 : too many enemy attack at once in second start => terminate setInterval
+// *issue 2 : speed and spawn rate
 // !issue 3 : newGame and GameOver function
 // !issue 4 : Enemy radius and Score
+// !issue 5 : HighScore Update
+// !issue 6 : Title and Scoreboard
