@@ -8,25 +8,25 @@
   </head>
   <body>
     <div class="header">
-        <!-- Scorecard -->
-        <div class="scorecard">
+      <!-- Scorecard -->
+      <div class="scorecard">
         <h2>Score: <span class="score">0</span></h2>
-        </div>
-        <!-- Title -->
-        <h1>Shoot The DOTs</h1>
+      </div>
+      <!-- Title -->
+      <h1 class="title">Shoot The DOTs</h1>
 
-        <!-- Action -->
-        <button id="start">Start Game</button>
+      <!-- Highscore Record of Each Level -->
+      <strong class="highscore">Easy : 100</strong>
     </div>
 
     <!-- Difficulty Level -->
     <form method="get">
       <label for="difficulty">Difficulty Level</label>
       <select name="difficulty" id="diff">
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-        <option value="insane">Insane</option>
+        <option value="Easy">Easy</option>
+        <option value="Medium">Medium</option>
+        <option value="Hard">Hard</option>
+        <option value="Insane">Insane</option>
       </select>
 
       <button type="submit" id="play">Play</button>
@@ -36,7 +36,14 @@
     <div class="gamePanel">
       <!-- Populate canvas with JS -->
     </div>
-
+    <!-- smooth animation -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+      integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <!-- Engine for Game -->
     <script src="engine.js"></script>
   </body>
 </html>
