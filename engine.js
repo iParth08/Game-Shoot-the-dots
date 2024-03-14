@@ -1,3 +1,11 @@
+// Importing sounds
+const introSong = new Audio("./music/introSong.mp3");
+const gameOverSound = new Audio("./music/gameOver.mp3");
+const heavyWeaponSound = new Audio("./music/heavyWeapon.mp3");
+const hugeWeaponSound = new Audio("./music/hugeWeapon.mp3");
+const lightWeaponSound = new Audio("./music/lightWeapon.mp3");
+const killEnemySound = new Audio("./music/killEnemy.mp3");
+
 // ------------------------------------------Setting Game ENVIRONMENT -- Canvas and Context------------------------
 const gamePanel = document.querySelector(".gamePanel");
 const canvas = document.createElement("canvas");
@@ -32,6 +40,7 @@ let impact = 6; //particle scattering
 let spawnRate = 1000;
 let spawnControl; //set interval termination on gameOver
 let diffLevel = "Easy"; //difficulty level selection
+let introChoice = false; //No Intro Music Option
 
 const lightWeaponDamage = 10;
 const heavyWeaponDamage = 15;
@@ -46,6 +55,18 @@ const currentScore = document.querySelector(".scorecard");
 const diffHighScore = document.querySelector(".highscore");
 const header = document.querySelector(".header");
 const selectDiff = document.querySelector("#diff");
+const introInput = document.querySelector("#introChoice");
+
+introInput.addEventListener("change", () => {
+  if(introInput.checked){
+    introChoice = true;
+    introSong.play();
+  }
+  else{
+    introChoice = false;
+    introSong.pause();
+  }
+})
 
 // GAMEPLAY START
 document.querySelector("#play").addEventListener("click", (e) => {
@@ -75,7 +96,8 @@ document.querySelector("#play").addEventListener("click", (e) => {
       break;
   }
 
-  // Clear Canvas
+  // Clear Canvas and INTRO Pause
+  introSong.pause();
   context.clearRect(0, 0, canvas.width, canvas.height);
   spawnControl = setInterval(enemySpawn, spawnRate);
   animation();
@@ -84,12 +106,25 @@ document.querySelector("#play").addEventListener("click", (e) => {
 // -------------------------------------- GAME FUNCTIONS ----------------------------------------
 
 const gameOver = () => {
+  // Sound Effects
+  //gameOver Sound
+  heavyWeaponSound.pause();
+  hugeWeaponSound.pause();
+  lightWeaponSound.pause();
+  killEnemySound.pause();
+  gameOverSound.play();
+  setTimeout(() => {
+    introChoice && introSong.play();
+    introSong.volume = 0.5;
+  }, 450);
+
   // Update Highscore
   highScorer(score);
 
   // display GameOver UI
   score = 0;
-  // currentScore.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`; //!testing use
+  currentScore.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`;
+
   form.style.display = "flex";
   header.style.display = "flex";
   currentScore.style.display = "none";
@@ -121,6 +156,10 @@ const highScorer = (scored) => {
 
 // fetch highscore on window load
 window.onload = () => {
+  // Play intro song
+  introChoice && introSong.play(); //uncomment to play !Annoying Sound!
+  introSong.volume = 0.5;
+
   //retrive hughScore from local storage
   const highScoreJSON = localStorage.getItem("highScore");
   if (highScoreJSON) {
@@ -303,6 +342,9 @@ const enemySpawn = () => {
 canvas.addEventListener("click", (event) => {
   //*Note : No weapon cost, unlimited usage
 
+  // LighWeaponSound == Shooting
+  lightWeaponSound.play();
+
   const clickAngle = Math.atan2(
     event.clientY - playerPosition.y,
     event.clientX - playerPosition.x
@@ -336,6 +378,8 @@ canvas.addEventListener("contextmenu", (event) => {
     return;
   } else {
     scoreUpdate(-6); //1 value reduction each fire
+    //HeavyWeaponSound
+    heavyWeaponSound.play();
   }
 
   const clickAngle = Math.atan2(
@@ -369,6 +413,8 @@ window.addEventListener("keydown", (event) => {
     return;
   } else {
     scoreUpdate(-20); //20 value reduction each fire
+    //KAMEHAMEHASound == hugeWeaponSound
+    hugeWeaponSound.play();
   }
   if (event.code === "Space") {
     console.log("kamehameha");
@@ -447,7 +493,7 @@ function animation() {
     if (closenessPlayerEnemy - player.radius - enemy.radius < 1) {
       // Game Over
       cancelAnimationFrame(animationID);
-      gameOver();
+      return gameOver();
     }
 
     // Collision Detection Logic with Huge Weapon (Kamehameha)
@@ -458,6 +504,7 @@ function animation() {
       if (closenessHugeWeaponEnemy < 200 && closenessHugeWeaponEnemy > -200) {
         // Ultimate Elimination
         setTimeout(() => {
+          gameOverSound.play();
           enemies.splice(enemyIndex, 1);
         }, 0);
       }
@@ -483,9 +530,12 @@ function animation() {
             weapons.splice(weaponIndex, 1);
           }, 0);
         } else {
-          // remove weapon and enemy, quickly [KILL]
+          // *NOTE : remove weapon and enemy, quickly [KILL]
+
           particleGenerator(weapon, enemy);
+
           setTimeout(() => {
+            killEnemySound.play();
             weapons.splice(weaponIndex, 1);
             enemies.splice(enemyIndex, 1);
           }, 0);
@@ -505,3 +555,6 @@ function animation() {
 // *issue 5 : HighScore Update --> onload and onchange from localStorage
 // *issue 6 : Title and currentScore --> handled display
 // *issue 7 : resize and response to resize ==> trick -> reload OR you have to re-draw
+//* issue 8 : intro is annoying, give choice
+
+// todo: IDea => Burst Shot, continuous with mouse direction
