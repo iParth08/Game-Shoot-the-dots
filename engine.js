@@ -8,6 +8,11 @@ canvas.height = innerHeight;
 // create context
 const context = canvas.getContext("2d");
 
+// handling resize with a trick
+window.addEventListener("resize", () => {
+  location.reload();
+});
+
 // ---------------------------------------- GAME SETTINGS and Variables ----------------------------
 
 // Difficulty setting and Score Points/Highscore
@@ -26,7 +31,7 @@ let difficulty = 1; //power-gap and speed of enemy
 let impact = 6; //particle scattering
 let spawnRate = 1000;
 let spawnControl; //set interval termination on gameOver
-let diffLevel; //difficulty level selection
+let diffLevel = "Easy"; //difficulty level selection
 
 const lightWeaponDamage = 10;
 const heavyWeaponDamage = 15;
@@ -37,18 +42,19 @@ const particles = [];
 const hugeWeapons = [];
 
 const form = document.querySelector("form");
-const scoreboard = document.querySelector(".scorecard");
-const levelScore = document.querySelector(".highscore");
-const title = document.querySelector(".title");
+const currentScore = document.querySelector(".scorecard");
+const diffHighScore = document.querySelector(".highscore");
+const header = document.querySelector(".header");
+const selectDiff = document.querySelector("#diff");
 
+// GAMEPLAY START
 document.querySelector("#play").addEventListener("click", (e) => {
   e.preventDefault();
   form.style.display = "none";
-  title.style.display = "none";
-  levelScore.style.display = "none";
-  scoreboard.style.display = "block";
+  header.style.display = "none";
+  currentScore.style.display = "block";
 
-  diffLevel = document.querySelector("#diff").value;
+  diffLevel = selectDiff.value;
 
   switch (diffLevel) {
     case "Easy":
@@ -73,6 +79,60 @@ document.querySelector("#play").addEventListener("click", (e) => {
   context.clearRect(0, 0, canvas.width, canvas.height);
   spawnControl = setInterval(enemySpawn, spawnRate);
   animation();
+});
+
+// -------------------------------------- GAME FUNCTIONS ----------------------------------------
+
+const gameOver = () => {
+  // Update Highscore
+  highScorer(score);
+
+  // display GameOver UI
+  score = 0;
+  // currentScore.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`; //!testing use
+  form.style.display = "flex";
+  header.style.display = "flex";
+  currentScore.style.display = "none";
+
+  // empty arrays and stop new enemy spawn
+  clearInterval(spawnControl);
+  enemies.splice(0, enemies.length);
+  weapons.splice(0, weapons.length);
+};
+
+// Current Score Update
+const scoreUpdate = (value) => {
+  score += value;
+  currentScore.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`;
+};
+
+// Highscore Update and LocalStorage save
+const highScorer = (scored) => {
+  if (scored > highScore[diffLevel]) {
+    highScore[diffLevel] = scored;
+  }
+
+  diffHighScore.innerHTML = `${diffLevel}: ${highScore[diffLevel]}`;
+
+  // save highscore to local storage
+  const highScoreJSON = JSON.stringify(highScore);
+  localStorage.setItem("highScore", highScoreJSON);
+};
+
+// fetch highscore on window load
+window.onload = () => {
+  //retrive hughScore from local storage
+  const highScoreJSON = localStorage.getItem("highScore");
+  if (highScoreJSON) {
+    highScore = JSON.parse(highScoreJSON);
+  }
+  diffHighScore.innerHTML = `${diffLevel}: ${highScore[diffLevel]}`; //display current difficulty level
+};
+
+// HighScore Display on Option Selection
+selectDiff.addEventListener("change", (e) => {
+  diffLevel = e.target.value;
+  diffHighScore.innerHTML = `${diffLevel}: ${highScore[diffLevel]}`;
 });
 
 // ------------------------------CLASS CREATION FOR ALL OBJECTS-------------------------------------------
@@ -317,6 +377,21 @@ window.addEventListener("keydown", (event) => {
 });
 
 // ----------------------------------------GAME ENGINE-ANIMATION RENDERING----------------------------------------
+
+//Particle Generator for scattering effect
+const particleGenerator = (weapon, enemy) => {
+  // Particles Effects Movement generation
+  for (let i = 0; i < 20; i++) {
+    particles.push(
+      new Particle(weapon.x, weapon.y, Math.random() * 3, enemy.color, {
+        x: (Math.random() - 0.5) * (Math.random() * impact), // think of it as *impact
+        y: (Math.random() - 0.5) * (Math.random() * impact),
+      })
+    );
+  }
+};
+
+// Main game animation rendering ==> GAME LOGIC
 let animationID;
 function animation() {
   animationID = requestAnimationFrame(animation);
@@ -420,57 +495,13 @@ function animation() {
   });
 }
 
-// -------------------------------------- GAME FUNCTIONS ----------------------------------------
-
-const particleGenerator = (weapon, enemy) => {
-  // Particles Effects Movement generation
-  for (let i = 0; i < 20; i++) {
-    particles.push(
-      new Particle(weapon.x, weapon.y, Math.random() * 3, enemy.color, {
-        x: (Math.random() - 0.5) * (Math.random() * impact), // think of it as *impact
-        y: (Math.random() - 0.5) * (Math.random() * impact),
-      })
-    );
-  }
-};
-const gameOver = () => {
-  // Update Highscore
-  highScorer(score); //! Testing feature
-
-  // display GameOver UI
-  score = 0;
-  scoreboard.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`;
-  form.style.display = "flex";
-  title.style.display = "block";
-  levelScore.style.display = "block";
-  scoreboard.style.display = "none";
-
-  // empty arrays and stop new enemy spawn
-  clearInterval(spawnControl);
-  enemies.splice(0, enemies.length);
-  weapons.splice(0, weapons.length);
-};
-
-// NOT WORKING AS I WANTED
-const scoreUpdate = (value) => {
-  score += value;
-  scoreboard.innerHTML = `<h2>Score: <span class="score">${score}</span></h2>`;
-};
-
-const highScorer = (scored) => {
-  if (scored > highScore[diffLevel]) {
-    highScore[diffLevel] = scored;
-  }
-
-  levelScore.innerHTML = `${diffLevel}: ${highScore[diffLevel]}`;
-};
-
 //-----------------------------------TESTING NEW FEATURE----------------------------------------------
 
 //----------------------------------ISSUES AND FIXES---------------------------------------------------
 // *issue 1 : too many enemy attack at once in second start => terminate setInterval
-// *issue 2 : speed and spawn rate
-// !issue 3 : newGame and GameOver function
-// !issue 4 : Enemy radius and Score
-// !issue 5 : HighScore Update
-// !issue 6 : Title and Scoreboard
+// *issue 2 : speed and spawn rate --> controlled by difficulty
+// *issue 3 : newGame and GameOver function --> Animation and interval reset
+// *issue 4 : Enemy radius and Score ---> per hit 5 points
+// *issue 5 : HighScore Update --> onload and onchange from localStorage
+// *issue 6 : Title and currentScore --> handled display
+// *issue 7 : resize and response to resize ==> trick -> reload OR you have to re-draw
