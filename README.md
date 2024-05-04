@@ -1,7 +1,7 @@
 # Game-Shoot-the-DOTs
 
 ## Description
-
+[live demo](https://iparth08.github.io/Game-Shoot-the-dots/)
 > Image here
 
 ## Tech Stack
