@@ -1,0 +1,146 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+
+  /* Prevent Selection */
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.gamePanel {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+canvas {
+  background-color: #222831;
+  width: 100%;
+  height: 100vh;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 10vh;
+  width: 100%;
+  z-index: 10;
+  /* background-color: rgba(0, 0, 0, 0.2); */
+  color: #fff;
+  padding: 40px 60px;
+  font: 600 1.2rem "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+
+  /* display: flex; */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scorecard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 10px 20px;
+  z-index: 12;
+  color: rgba(255, 255, 255, 0.2);
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  display: none;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  font-family: cursive;
+}
+
+.title a {
+  font-size: 1rem;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  letter-spacing: 2px;
+  color: #fff;
+  text-decoration: double underline rgb(218, 77, 77) 2.5px;
+}
+
+.highscore {
+  padding: 10px;
+  font-size: 1.3rem;
+}
+
+form {
+  background-color: rgba(255, 255, 255, 0.1);
+  height: 60vh;
+  width: 60vw;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  z-index: 10;
+}
+
+form label {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+form select,
+form option {
+  font-size: 1.5rem;
+  padding: 15px 20px;
+  width: 20vw;
+  transition: all 0.5s ease;
+  font-family: cursive;
+  text-align: center;
+}
+
+form button {
+  padding: 15px 25px;
+  width: 20vw;
+  margin: 20px 0px;
+  font-family: cursive;
+  background-color: indianred;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  transition: all 0.5s ease;
+  cursor: pointer;
+}
+
+form > select:hover {
+  box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+form > button:hover {
+  box-shadow: 0 0 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+form .introMusic {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+}
+
+form .introMusic label {
+  font-size: 1.2rem;
+  font-family: cursive;
+}
